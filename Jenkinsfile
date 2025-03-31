@@ -108,6 +108,7 @@ pipeline {
     }
   }
   
+  
   post {
     success {
       echo "빌드 및 배포 성공! 브랜치: ${env.BRANCH_NAME}"
