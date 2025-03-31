@@ -86,27 +86,48 @@ public class BoardController {
     }
 
     // 6. 첨부파일 다운로드
+//    @GetMapping("/{boardId}/download")
+//    public void download(@PathVariable Long boardId,
+//                         HttpServletResponse response) throws IOException {
+//        Optional<File> optional = fileService.download(boardId);
+//
+//        if (optional.isEmpty()) {
+//            return;
+//        }
+//
+//        File file = optional.get();
+//
+//        Path path = Paths.get(file.getFilePath());
+//        byte[] result = Files.readAllBytes(path);
+//
+//        response.setContentType("application/octet-stream");
+//        response.setContentLength(result.length);
+//        response.setHeader("Content-Disposition",
+//                "attachment; fileName=\"" + URLEncoder.encode(file.getFileName() + ".pdf", "UTF-8") + "\";");
+//        response.setHeader("Content-Transfer-Encoding", "binary");
+//        response.getOutputStream().write(result);
+//        response.getOutputStream().flush();
+//        response.getOutputStream().close();
+//    }
+
+    // 6. 첨부파일 다운로드 - S3에서 PDF 파일 읽어오기
     @GetMapping("/{boardId}/download")
     public void download(@PathVariable Long boardId,
                          HttpServletResponse response) throws IOException {
-        Optional<File> optional = fileService.download(boardId);
-
-        if (optional.isEmpty()) {
+        FileService.DownloadedFile downloadedFile = fileService.downloadPdf(boardId);
+        if (downloadedFile == null) {
             return;
         }
-
-        File file = optional.get();
-
-        Path path = Paths.get(file.getFilePath());
-        byte[] result = Files.readAllBytes(path);
+        byte[] result = downloadedFile.getContent();
 
         response.setContentType("application/octet-stream");
         response.setContentLength(result.length);
         response.setHeader("Content-Disposition",
-                "attachment; fileName=\"" + URLEncoder.encode(file.getFileName() + ".pdf", "UTF-8") + "\";");
+                "attachment; fileName=\"" + URLEncoder.encode(downloadedFile.getFileName() + ".pdf", "UTF-8") + "\";");
         response.setHeader("Content-Transfer-Encoding", "binary");
         response.getOutputStream().write(result);
         response.getOutputStream().flush();
         response.getOutputStream().close();
     }
+
 }
