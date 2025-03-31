@@ -40,11 +40,13 @@ public class FileService {
     private S3Client s3Client;
 
     // 실제 사용중인 S3 버킷 이름으로 변경하세요.
-    @Value("${spring.cloud.aws.s3.region}")
+    @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
 
     @Async("taskExecutor")
     public void createPdf(Board board) throws IOException {
+        log.info("[createPdf] bucketName: {}", bucketName);
+
         // PDF 문서 생성
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
