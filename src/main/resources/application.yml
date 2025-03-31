@@ -3,5 +3,3 @@ spring:
     name: board
   config:
     import: "optional:configserver:http://54.215.85.146:8071"
-server:
-  port: 8082
