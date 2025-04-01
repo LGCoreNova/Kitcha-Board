@@ -37,7 +37,7 @@ pipeline {
             def ecrTagPrefix = "803691999553.dkr.ecr.us-west-1.amazonaws.com/kitcha/board"
 
             def deployTag = "latest"
-            if (env.BRANCH_NAME != "main") {
+            if (env.BRANCH_NAME != "main" && env.BRANCH_NAME != "master") {
                 deployTag = env.BRANCH_NAME
             }
 
@@ -94,11 +94,11 @@ pipeline {
       agent any
       when {
         expression { 
-          return env.BRANCH_NAME == 'main' 
+          return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master'
         }
       }
       steps {
-        echo "프로덕션 환경에 배포 중: main 브랜치"
+        echo "프로덕션 환경에 배포 중: ${env.BRANCH_NAME} 브랜치"
         sshPublisher(publishers: [
           sshPublisherDesc(
             configName: 'toy-docker-server',
