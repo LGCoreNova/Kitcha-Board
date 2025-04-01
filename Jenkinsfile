@@ -104,6 +104,36 @@ pipeline {
       }
       steps {
         echo "프로덕션 환경에 배포 중: main 브랜치"
+        sshPublisher(publishers: [
+          sshPublisherDesc(
+            configName: 'toy-docker-server',
+            transfers: [sshTransfer(
+              cleanRemote: false,
+              excludes: '',
+              execCommand: """
+                cd kitcha/board
+                # ECS 배포 스크립트 실행
+                aws ecs describe-task-definition --task-definition kitcha-board --output json > task-board-definition.json
+                jq '{family: .taskDefinition.family, networkMode: .taskDefinition.networkMode, containerDefinitions: .taskDefinition.containerDefinitions, requiresCompatibilities: .taskDefinition.requiresCompatibilities, cpu: .taskDefinition.cpu, memory: .taskDefinition.memory, executionRoleArn: .taskDefinition.executionRoleArn, volumes: .taskDefinition.volumes, placementConstraints: .taskDefinition.placementConstraints}' task-board-definition.json > clean-task-board-def.json
+                aws ecs register-task-definition --cli-input-json file://clean-task-board-def.json
+                aws ecs update-service --cluster LGCNS-Cluster-2 --service kitcha-board-service --task-definition kitcha-board
+                echo "ECS 서비스 업데이트 완료: kitcha-board-service"
+              """,
+              execTimeout: 300000,
+              flatten: false,
+              makeEmptyDirs: false,
+              noDefaultExcludes: false,
+              patternSeparator: '[, ]+',
+              remoteDirectory: '',
+              remoteDirectorySDF: false,
+              removePrefix: '',
+              sourceFiles: ''
+            )],
+            usePromotionTimestamp: false,
+            useWorkspaceInPromotion: false,
+            verbose: true
+          )
+        ])
       }
     }
   }
